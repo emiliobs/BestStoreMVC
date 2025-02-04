@@ -1,0 +1,64 @@
+﻿@model List<Product>
+@{
+    ViewData["Title"] = "List of Products.";
+}
+
+<div class="row mb-5">
+    <div class="col-12 ">
+        <a class="btn btn-primary"asp-controller="Products" asp-action="Create" >Create New Product.</a>
+    </div>
+    <div class="col-12">
+        <div class="card shadow mt-3">
+            <div class="card-header text-center">
+                <h3>@ViewData["Title"]</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-dark table-striped table-hover table-responsive">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Brand</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Image</th>
+                            <th>CreateAt</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model is not null)
+                        {
+                            @foreach (var product in Model)
+                            {
+                                <tr>
+                                    <td>@product.Id</td>
+                                    <td>@product.Name</td>
+                                    <td>@product.Brand</td>
+                                    <td>@product.Category</td>
+                                    <td>@product.Price£</td>
+                                    <td><img  src="/products/@product.ImageFileName" width="100"/></td>
+                                    <td>@product.CreatedAt.ToString("MM/dd/yyyy")</td>                                    
+                                    
+                                    <td>
+                                        <a asp-controller="Products" asp-action="Edit"  asp-route-id="@product.Id" class="btn btn-info">Edit.</a>
+                                        <a asp-controller="Products" asp-action="Delete" asp-route-id="@product.Id" class="btn btn-danger">Delete.</a>
+                                    </td> 
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    No Products are available at the moment.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+     </div>
+</div>
+
