@@ -66,5 +66,85 @@ namespace BestStoreMVC.Controllers
 
             return RedirectToAction("Index", "Products");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            Product product = await _context.Products.FindAsync(id);
+
+            if (product is null)
+            {
+                return RedirectToAction("Index", "Products");
+            }
+
+            // Create productDtos from product
+            var productDto = new ProductDto
+            {
+                Name = product.Name,
+                Brand = product.Brand,
+                Category = product.Category,
+                Price = product.Price,
+                Description = product.Description,
+            };
+
+            ViewData["ProductID"] = product.Id;
+            ViewData["ImageFileName"] = product.ImageFileName;
+            ViewData["CreatedAt"] = product.CreatedAt.ToString("MM/dd/yyyy");
+
+            return View(productDto);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, ProductDto productDto)
+        {
+            var product = await _context.Products.FindAsync(id);
+
+            if (product is null)
+            {
+                return RedirectToAction("Index", "Products");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                ViewData["ProductID"] = product.Id;
+                ViewData["ImageFileName"] = product.ImageFileName;
+                ViewData["CreatedAt"] = product.CreatedAt.ToString("MM/dd/yyyy");
+
+                return View(productDto);
+            }
+
+            // Update the image file file if we have a new image file
+            string newFileName = product.ImageFileName;
+
+            if (productDto.ImageFile is not null)
+            {
+                newFileName = DateTime.Now.ToString("yyyyMMddHHmmssfff") + Path.GetExtension(productDto.ImageFile.FileName);
+                string imageFullPath = _environment.WebRootPath + "/products/" + newFileName;
+                using (var stream = System.IO.File.Create(imageFullPath))
+                {
+                    productDto.ImageFile.CopyTo(stream);
+                }
+
+                // delete thge old image file
+                string oldImageFullPath = _environment.WebRootPath + "/products/" + product.ImageFileName;
+                if (System.IO.File.Exists(oldImageFullPath))
+                {
+                    System.IO.File.Delete(oldImageFullPath);
+                }
+            }
+
+            // Update the product in the database
+            product.Name = productDto.Name;
+            product.Brand = productDto.Brand;
+            product.Category = productDto.Category;
+            product.Price = productDto.Price;
+            product.Description = productDto.Description;
+            product.ImageFileName = newFileName;
+
+            _context.Products.Update(product);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index", "Products");
+        }
     }
 }
