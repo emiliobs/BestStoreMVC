@@ -146,5 +146,27 @@ namespace BestStoreMVC.Controllers
 
             return RedirectToAction("Index", "Products");
         }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+
+            if (product == null)
+            {
+                return RedirectToAction("Index", "Products");
+            }
+
+            // delete the image file
+            string imageFullPath = _environment.WebRootPath + "/products/" + product.ImageFileName;
+            if (System.IO.File.Exists(imageFullPath))
+            {
+                System.IO.File.Delete(imageFullPath);
+            }
+
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index", "Products");
+        }
     }
 }
